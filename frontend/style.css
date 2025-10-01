@@ -1,0 +1,25 @@
+
+.title_header{
+    position: absolute;
+    top: 2%;
+    left: 2%;
+}
+
+
+.textarea {  
+    position: absolute;
+    top:30%;
+    left:50%;
+    transform: translateX(-50%);
+    height: 250px;
+    width: 600px;
+}
+
+.record_button{
+    position: absolute;
+    top:65%;
+    left:50%;
+    transform: translateX(-50%);
+    height: 40px;
+    width: 100px;
+}
