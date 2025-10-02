@@ -22,4 +22,5 @@
     transform: translateX(-50%);
     height: 40px;
     width: 100px;
+    cursor: pointer;
 }

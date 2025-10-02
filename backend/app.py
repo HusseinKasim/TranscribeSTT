@@ -15,7 +15,9 @@ app = FastAPI()
 
 @app.get("/transcribe")
 async def transcribe():
-    # Take audio from user
+    # Take audio from frontend
+
+    # Resample audio from 48kHz to 16kHz
 
     # Feed the model
 
