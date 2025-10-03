@@ -26,15 +26,14 @@ async function CollectSteam(){
         // Connect source to AudioWorkletNode to be processed
         source.connect(micNode);
 
-        // Fetch processed mic data from AudioWorkletNode processor
-        micNode.port.onmessage = (event) => {
-            const audioChunk = event.data;
-            // console.log(audioChunk); // Test results
-        };
-
         // Implement Websocket 
+        const ws = new WebSocket("http://localhost:8001/api/data")
 
-        // Send audioChunk to backend via Websocket
+        // Fetch processed mic data as chunks from AudioWorkletNode processor
+        micNode.port.onmessage = (event) => {
+            // Send chunks to backend via Websocket 
+            ws.send(JSON.stringify({msg: event.data}));
+        };
     };
 }
 
@@ -47,6 +46,4 @@ async function ToggleMic(){
         await CollectSteam();
         console.log("Started");
     }
-
-    // Implement stop recording
 }
