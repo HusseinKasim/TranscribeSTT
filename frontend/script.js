@@ -9,7 +9,7 @@ async function CollectSteam(){
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
         
         // Create AudioContext instance
-        const audioContext = new AudioContext();
+        const audioContext = new AudioContext({sampleRate: 16000});
 
         // Collect input data stream from mic
         const stream = await navigator.mediaDevices.getUserMedia({audio: true})
@@ -27,7 +27,7 @@ async function CollectSteam(){
         source.connect(micNode);
 
         // Implement Websocket 
-        const ws = new WebSocket("http://localhost:8001/api/data")
+        const ws = new WebSocket("http://localhost:8002/api/data")
 
         // Fetch processed mic data as chunks from AudioWorkletNode processor
         micNode.port.onmessage = (event) => {

@@ -2,6 +2,7 @@ import torch
 import torchaudio.pipelines
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
 
 # Use GPU if available, else CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -23,20 +24,26 @@ app.add_middleware(
     allow_headers = ["*"],
 )
 
+data_store = asyncio.Queue()
+
 @app.get("/transcribe")
 async def transcribe():
-   # Take audio from frontend
 
-    # Resample audio from 48kHz to 16kHz
+    # Take audio from frontend
+    if data_store.empty():
+        return {'data': None}
+    
+    data = await asyncio.wait_for(data_store.get(), timeout=1)
+    print(data) 
 
     # Feed the model
 
     # Return result
-    return {"message": "Placeholder"}
 
 @app.websocket("/api/data")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
         data = await websocket.receive_json()
-        print(data)
+        await data_store.put(data)
+        await transcribe()
