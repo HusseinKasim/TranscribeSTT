@@ -9,7 +9,7 @@ async function CollectSteam(){
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
         
         // Create AudioContext instance
-        const audioContext = new AudioContext({sampleRate: 16000});
+        const audioContext = new AudioContext();
 
         // Collect input data stream from mic
         const stream = await navigator.mediaDevices.getUserMedia({audio: true})

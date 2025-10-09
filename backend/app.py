@@ -13,6 +13,9 @@ bundle = torchaudio.pipelines.EMFORMER_RNNT_BASE_LIBRISPEECH
 # Move model to device
 model = bundle._get_model().to(device)
 
+# Get decoder
+decoder = bundle.get_decoder()
+
 app = FastAPI()
 
 # Temp for dev
@@ -34,11 +37,18 @@ async def transcribe():
         return {'data': None}
     
     data = await asyncio.wait_for(data_store.get(), timeout=1)
-    print(data) 
 
-    # Feed the model
+    # Store data in Tensor
+    tensor = torch.tensor(data)
+    print(data)
 
-    # Return result
+    # Feed the model the Tensor
+
+    # Feed output of model to decoder 
+
+    # Feed output of decoder to token processor
+
+    # Combine result and result
 
 @app.websocket("/api/data")
 async def websocket_endpoint(websocket: WebSocket):
