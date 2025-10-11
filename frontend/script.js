@@ -40,7 +40,6 @@ async function CollectSteam(){
 // Toggle mic recording functionality
 async function ToggleMic(){
     is_recording = !is_recording;
-
     if(is_recording)
     {
         await CollectSteam();
