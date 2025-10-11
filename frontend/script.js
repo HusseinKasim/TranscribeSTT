@@ -32,7 +32,7 @@ async function CollectSteam(){
         // Fetch processed mic data as chunks from AudioWorkletNode processor
         micNode.port.onmessage = (event) => {
             // Send chunks to backend via Websocket 
-            ws.send(JSON.stringify({msg: event.data}));
+            ws.send(JSON.stringify({sample_rate: audioContext.sampleRate, msg: event.data}));
         };
     };
 }

@@ -40,6 +40,9 @@ async def transcribe():
     # Store audio values (PCM) in list
     data_list = list(data['msg'].values())
 
+    # Fetch input sample rate
+    input_sample_rate = data['sample_rate']
+
     # Store data in tensor
     data_tensor = torch.tensor(data_list)
 
@@ -48,7 +51,7 @@ async def transcribe():
         data_tensor = data_tensor.unsqueeze(0)
     
     # Resample data from 48kHz to 16kHz
-    resampler = torchaudio.transforms.Resample(orig_freq=48000, new_freq=bundle.sample_rate)
+    resampler = torchaudio.transforms.Resample(orig_freq=input_sample_rate, new_freq=bundle.sample_rate)
     data_tensor = resampler(data_tensor.float())
     
     # Pass data into model
