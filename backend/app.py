@@ -36,6 +36,8 @@ async def transcribe():
     data = await asyncio.wait_for(data_store.get(), timeout=1)
 
     # ADD BUFFER TO TAKE UP TO 14400 CHUNKS (which will then be converted to 4800 chunks after resampling to 16kHZ)
+    MAX_CHUNKS = 14400 # Should become dynamic
+    buffer = []
 
     # Store audio values (PCM) in list
     data_list = list(data['msg'].values())
@@ -43,17 +45,22 @@ async def transcribe():
     # Fetch input sample rate
     input_sample_rate = data['sample_rate']
 
+    # Fill buffer (should be fixed)
+    while len(buffer) < MAX_CHUNKS:
+        for element in data_list:
+            buffer.append(element)
+
     # Store data in tensor
-    data_tensor = torch.tensor(data_list)
+    data_tensor = torch.tensor(buffer)
 
     # Prepare tensor for resampling (update shape [128] -> [1, 128])
     if data_tensor.dim() == 1:
         data_tensor = data_tensor.unsqueeze(0)
     
     # Resample data from 48kHz to 16kHz
-    resampler = torchaudio.transforms.Resample(orig_freq=input_sample_rate, new_freq=bundle.sample_rate)
-    data_tensor = resampler(data_tensor.float())
-    
+    data_tensor = torchaudio.functional.resample(data_tensor, input_sample_rate, bundle.sample_rate)
+    data_tensor = data_tensor.float()
+
     # Pass data into model
     emissions, _ = model(data_tensor)
 
