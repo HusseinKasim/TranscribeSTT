@@ -15,6 +15,7 @@ model = bundle.get_model()
 labels = bundle.get_labels()
 
 app = FastAPI()
+buffer = []
 
 # Temp for dev
 app.add_middleware(
@@ -29,15 +30,13 @@ data_store = asyncio.Queue()
 
 @app.get("/transcribe")
 async def transcribe():
+    global buffer
+
     # Receive audio from frontend
     if data_store.empty():
         return {'data': None}
     
     data = await asyncio.wait_for(data_store.get(), timeout=1)
-
-    # ADD BUFFER TO TAKE UP TO 14400 CHUNKS (which will then be converted to 4800 chunks after resampling to 16kHZ)
-    MAX_CHUNKS = 14400 # Should become dynamic
-    buffer = []
 
     # Store audio values (PCM) in list
     data_list = list(data['msg'].values())
@@ -45,33 +44,45 @@ async def transcribe():
     # Fetch input sample rate
     input_sample_rate = data['sample_rate']
 
-    # Fill buffer (should be fixed)
-    while len(buffer) < MAX_CHUNKS:
-        for element in data_list:
-            buffer.append(element)
+    # Max chunks of buffer 
+    max_chunks = int(input_sample_rate * 3)
+    
+    # Fill buffer
+    for sample in data_list:
+        buffer.append(sample)
 
-    # Store data in tensor
-    data_tensor = torch.tensor(buffer)
+    # Limit buffer to max
+    if len(buffer) > max_chunks:
+        buffer = buffer[-max_chunks:]
+    
+    # Only accept above minimum chunks to pass to model
+    min_chunks = int(bundle.sample_rate * 3)
+    if len(buffer) < min_chunks:
+        return {"data": None} 
 
-    # Prepare tensor for resampling (update shape [128] -> [1, 128])
+    # Store data in tensor and convert to float
+    data_tensor = torch.tensor(buffer, dtype=torch.float32)
+
+    # Prepare tensor for resampling (update shape E.g. [128] -> [1, 128])
     if data_tensor.dim() == 1:
         data_tensor = data_tensor.unsqueeze(0)
-    
+
     # Resample data from 48kHz to 16kHz
     data_tensor = torchaudio.functional.resample(data_tensor, input_sample_rate, bundle.sample_rate)
-    data_tensor = data_tensor.float()
 
-    # Pass data into model
-    emissions, _ = model(data_tensor)
+    # Pass data into model  
+    with torch.inference_mode():
+        emissions, _ = model(data_tensor)
 
     # Feed output of decoder to token processor
-    tokens = torch.argmax(emissions, dim=-1)
+    decoder = GreedyCTCDecoder(labels)
 
     # Build transcription
-    transcript = "".join([labels[i] for i in tokens[0]])
+    transcript = decoder(emissions[0])
 
     # Print result
-    print(transcript.strip())
+    print(transcript)
+
 
 @app.websocket("/api/data")
 async def websocket_endpoint(websocket: WebSocket):
@@ -80,3 +91,16 @@ async def websocket_endpoint(websocket: WebSocket):
         data = await websocket.receive_json()
         await data_store.put(data)
         await transcribe()
+
+
+class GreedyCTCDecoder(torch.nn.Module):
+    def __init__(self, labels, blank=0):
+        super().__init__()
+        self.labels = labels
+        self.blank = blank
+
+    def forward(self, emission: torch.Tensor) -> str:
+        indices = torch.argmax(emission, dim=-1) 
+        indices = torch.unique_consecutive(indices, dim=-1)
+        indices = [i for i in indices if i != self.blank]
+        return "".join([self.labels[i] for i in indices])
