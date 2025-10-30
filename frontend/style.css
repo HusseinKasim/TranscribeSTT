@@ -1,26 +1,89 @@
 
-.title_header{
-    position: absolute;
-    top: 2%;
-    left: 2%;
+.doc{
+    background-color: #FAFAFA;
 }
 
+.title_header{
+    position: absolute;
+    top: 4%;
+    left: 5%;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.h2{
+    position: absolute;
+    top: 13%;
+    left:50%;
+    transform: translateX(-50%);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.play_button_img{
+    position: absolute;
+    height:150px;
+    top: 25%;
+    left: 17%
+}
+
+.mic_img{
+    position: absolute;
+    height:150px;
+    top: 25%;
+    left: 46%
+}
+
+.speaking_img{
+    position: absolute;
+    height:150px;
+    top: 25%;
+    left: 71%
+}
+
+.t1{
+    position: absolute;
+    top: 43%;
+    left: 15%;
+    font-family: 'Lato', sans-serif;
+}
+
+.t2{
+    position: absolute;
+    top: 43%;
+    left: 45%;
+    font-family: 'Lato', sans-serif;
+}
+
+.t3{
+    position: absolute;
+    top: 43%;
+    left: 75%;
+    font-family: 'Lato', sans-serif;
+}
 
 .textarea {  
     position: absolute;
-    top:30%;
-    left:50%;
+    border-radius: 7px;
+    border-width: 1px;
+    border-color: rgb(197, 196, 196);
+    border-style: ridge;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    background-color: #FAFAFA;
+    padding: 20px;
+    top: 55%;
+    left: 50%;
     transform: translateX(-50%);
     height: 250px;
     width: 600px;
+    font-family: 'Lato', sans-serif;
 }
 
 .record_button{
     position: absolute;
-    top:65%;
-    left:50%;
+    top: 90%;
+    left: 50%;
     transform: translateX(-50%);
     height: 40px;
     width: 100px;
     cursor: pointer;
+    font-family: 'Lato', sans-serif;    
 }
