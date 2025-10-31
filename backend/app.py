@@ -3,6 +3,7 @@ import torchaudio.pipelines
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
+import json
 
 # Use GPU if available, else CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -58,11 +59,11 @@ async def transcribe():
     # Only accept above minimum chunks to pass to model
     min_chunks = int(bundle.sample_rate * 3)
     if len(buffer) < min_chunks:
-        return {"data": None} 
+        return {'data': None} 
 
     # Store data in tensor and convert to float
     data_tensor = torch.tensor(buffer, dtype=torch.float32)
-
+    
     # Prepare tensor for resampling (update shape E.g. [128] -> [1, 128])
     if data_tensor.dim() == 1:
         data_tensor = data_tensor.unsqueeze(0)
@@ -70,6 +71,10 @@ async def transcribe():
     # Resample data from 48kHz to 16kHz
     data_tensor = torchaudio.functional.resample(data_tensor, input_sample_rate, bundle.sample_rate)
 
+    # Check for silence
+    if torch.sqrt(torch.mean(data_tensor ** 2)) < 0.005:
+        return {'data': None}
+    
     # Pass data into model  
     with torch.inference_mode():
         emissions, _ = model(data_tensor)
@@ -83,6 +88,8 @@ async def transcribe():
     # Print result
     print(transcript)
 
+    return {"message": transcript}
+
 
 @app.websocket("/api/data")
 async def websocket_endpoint(websocket: WebSocket):
@@ -90,7 +97,8 @@ async def websocket_endpoint(websocket: WebSocket):
     while True:
         data = await websocket.receive_json()
         await data_store.put(data)
-        await transcribe()
+        response = await transcribe()
+        await websocket.send_json(response)
 
 
 class GreedyCTCDecoder(torch.nn.Module):
