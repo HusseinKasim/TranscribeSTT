@@ -29,17 +29,15 @@ async function CollectSteam(){
         // Implement Websocket 
         const ws = new WebSocket("ws://localhost:8002/api/data")
 
-        ws.onopen = () =>
-        {
-            // Fetch processed mic data as chunks from AudioWorkletNode processor
-            micNode.port.onmessage = (event) => {
-                // Send chunks to backend via Websocket 
-                ws.send(JSON.stringify({sample_rate: audioContext.sampleRate, msg: event.data}));
-            };
+        // Fetch processed mic data as chunks from AudioWorkletNode processor
+        micNode.port.onmessage = (event) => {
+            // Send chunks to backend via Websocket 
+            ws.send(JSON.stringify({sample_rate: audioContext.sampleRate, msg: event.data}));
         };
 
+        // Return JSON message from backend
         ws.onmessage = (event) => {
-            const responseData = JSON.parse(event.data)
+            let responseData = JSON.parse(event.data)
             console.log(responseData)
         };
     };
