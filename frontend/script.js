@@ -40,7 +40,7 @@ async function CollectSteam(){
 
         ws.onmessage = (event) => {
             const responseData = JSON.parse(event.data)
-            console.log("Received")
+            console.log(responseData)
         };
     };
 }
