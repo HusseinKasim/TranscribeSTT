@@ -35,7 +35,7 @@ async def transcribe():
 
     # Receive audio from frontend
     if data_store.empty():
-        return {'data': None}
+        return {'message': '""'}
     
     data = await asyncio.wait_for(data_store.get(), timeout=1)
 
@@ -46,7 +46,7 @@ async def transcribe():
     input_sample_rate = data['sample_rate']
 
     # Max chunks of buffer 
-    max_chunks = int(input_sample_rate * 3)
+    max_chunks = int(input_sample_rate * 4)
     
     # Fill buffer
     for sample in data_list:
@@ -55,40 +55,40 @@ async def transcribe():
     # Limit buffer to max
     if len(buffer) > max_chunks:
         buffer = buffer[-max_chunks:]
+     
+    if len(buffer) == max_chunks:
+        # Store data in tensor and convert to float
+        data_tensor = torch.tensor(buffer, dtype=torch.float32)
+        
+        # Prepare tensor for resampling (update shape E.g. [128] -> [1, 128])
+        if data_tensor.dim() == 1:
+            data_tensor = data_tensor.unsqueeze(0)
+
+        # Resample data from 48kHz to 16kHz
+        data_tensor = torchaudio.functional.resample(data_tensor, input_sample_rate, bundle.sample_rate)
+
+        # Check for silence
+        if torch.sqrt(torch.mean(data_tensor ** 2)) < 0.005:
+            return {'message': ''}
+        
+        # Pass data into model  
+        with torch.inference_mode():
+            emissions, _ = model(data_tensor)
+
+        # Feed output of decoder to token processor
+        decoder = GreedyCTCDecoder(labels)
+
+        # Build transcription
+        transcript = decoder(emissions[0])
+
+        # Print result
+        print(transcript)
+
+        buffer.clear()
+
+        return {'message': transcript}
     
-    # Only accept above minimum chunks to pass to model
-    min_chunks = int(bundle.sample_rate * 3)
-    if len(buffer) < min_chunks:
-        return {'data': None} 
-
-    # Store data in tensor and convert to float
-    data_tensor = torch.tensor(buffer, dtype=torch.float32)
-    
-    # Prepare tensor for resampling (update shape E.g. [128] -> [1, 128])
-    if data_tensor.dim() == 1:
-        data_tensor = data_tensor.unsqueeze(0)
-
-    # Resample data from 48kHz to 16kHz
-    data_tensor = torchaudio.functional.resample(data_tensor, input_sample_rate, bundle.sample_rate)
-
-    # Check for silence
-    if torch.sqrt(torch.mean(data_tensor ** 2)) < 0.005:
-        return {'data': None}
-    
-    # Pass data into model  
-    with torch.inference_mode():
-        emissions, _ = model(data_tensor)
-
-    # Feed output of decoder to token processor
-    decoder = GreedyCTCDecoder(labels)
-
-    # Build transcription
-    transcript = decoder(emissions[0])
-
-    # Print result
-    print(transcript)
-
-    return {"message": transcript}
+    return {'message': ''}
 
 
 @app.websocket("/api/data")

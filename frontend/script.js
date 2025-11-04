@@ -45,22 +45,22 @@ async function CollectSteam(){
 
             // Return JSON message from backend
             ws.onmessage = (event) => {
-                let response = JSON.parse(event.data)['message'];
-                
-                // Filter out spaces
-                if(response && response.includes(' '))
-                {
-                    response = response.replace(/\s/g, '').trim();    
-                }
-                
-                // Filter out |
-                if(response && response.includes("|"))
-                {
-                    response = response.replace(/\|/g, ' ') 
-                }
+                    let response = JSON.parse(event.data)['message'];
 
-                // Update textarea
-                txt_area.innerHTML += response;
+                    // Filter out spaces
+                    if(response && response.includes(' '))
+                    {
+                        response = response.replace(/\s/g, '').trim();    
+                    }
+                    
+                    // Filter out |
+                    if(response && response.includes("|"))
+                    {
+                        response = response.replace(/\|/g, ' ');
+                    }
+
+                    // Update textarea
+                    txt_area.innerHTML += response;
             };
         };  
     }
