@@ -30,7 +30,7 @@ async function CollectSteam(){
         source.connect(micNode);
 
         // Implement Websocket 
-        ws = new WebSocket("ws://localhost:8002/api/data");
+        ws = new WebSocket("wss://transcribestt.onrender.com/api/data");
         ws.onopen = () => {
 
             // Fetch processed mic data as chunks from AudioWorkletNode processor
