@@ -3,7 +3,6 @@ import torchaudio.pipelines
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
-import json
 
 # Use GPU if available, else CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,6 +16,11 @@ labels = bundle.get_labels()
 
 app = FastAPI()
 buffer = []
+
+origins = [
+    'https://husseinkasim.github.io/',
+    'https://husseinkasim.github.io/TranscribeSTT/'
+]
 
 # Temp for dev
 app.add_middleware(
@@ -80,9 +84,6 @@ async def transcribe():
 
         # Build transcription
         transcript = decoder(emissions[0])
-
-        # Print result
-        print(transcript)
 
         buffer.clear()
 
