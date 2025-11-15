@@ -6,19 +6,23 @@ let is_recording = false;
 
 mic_btn.addEventListener("click", ToggleMic);
 
-let ws;
+let ws = null;
+let audioContext = null;
+let source = null;
+let stream = null;
+let micNode = null;
 
 // Process input mic audio
 async function CollectSteam(){
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
         // Create AudioContext instance
-        const audioContext = new AudioContext();
+        audioContext = new AudioContext();
 
         // Collect input data stream from mic
-        const stream = await navigator.mediaDevices.getUserMedia({audio: true})
+        stream = await navigator.mediaDevices.getUserMedia({audio: true})
         
         // Convert to AudioContext source
-        const source = audioContext.createMediaStreamSource(stream);
+        source = audioContext.createMediaStreamSource(stream);
         
         // Load custom audio data processor from 'processor.js'
         await audioContext.audioWorklet.addModule('processor.js');
@@ -30,7 +34,8 @@ async function CollectSteam(){
         source.connect(micNode);
 
         // Implement Websocket 
-        ws = new WebSocket("wss://transcribestt.onrender.com/api/data");
+        ws = new WebSocket("ws://localhost:8003/api/data");
+
         ws.onopen = () => {
 
             // Fetch processed mic data as chunks from AudioWorkletNode processor
@@ -66,12 +71,49 @@ async function CollectSteam(){
     }
 };
 
+function StopStream(){
+    if(ws)
+    {
+        ws.close();
+        ws = null;
+    }
+
+    if(micNode)
+    {
+        micNode.disconnect();
+        micNode = null;
+    }
+
+    if(source)
+    {
+        source.disconnect();
+        source = null;
+    }
+
+    if(stream)
+    {
+        stream.getTracks().forEach(t => t.stop());
+        stream = null;
+    }
+
+    if(audioContext)
+    {
+        audioContext.close();
+        audioContext = null;
+    }
+}
+
 // Toggle mic recording functionality
 async function ToggleMic(){
     is_recording = !is_recording;
+
     if(is_recording)
     {
-        CollectSteam(is_recording);
+        await CollectSteam(is_recording);
         console.log("Started");
+    }
+    else
+    {
+        StopStream();
     }
 }
