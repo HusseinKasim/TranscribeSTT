@@ -3,6 +3,6 @@ A website that implements a PyTorch model that transcribes user audio inputs (En
 
 The PyTorch model used is the pre-trained "WAV2VEC2_ASR_BASE_960H" model.
 
-This project uses the Python programming language and leverages PyTorch for the speech-to-text model and FastAPI for the backend.
+This project uses the Python programming language and leverages PyTorch for the speech-to-text model and FastAPI for the backend, in addition to basic HTML, CSS, and JavaScript for the frontend.
 
 An optional Dockerfile has been added to allow interested users to build the backend locally via a Docker container.
