@@ -34,7 +34,7 @@ async function CollectSteam(){
         source.connect(micNode);
 
         // Implement Websocket 
-        ws = new WebSocket("https://HusseinKasim2001-TranscribeSTT.hf.space/");
+        ws = new WebSocket("wss://HusseinKasim2001-TranscribeSTT.hf.space/api/data");
 
         ws.onopen = () => {
 
