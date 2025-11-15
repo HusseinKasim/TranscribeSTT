@@ -4,9 +4,6 @@ from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 
-# Use GPU if available, else CPU (Render free plan does not support GPU usage)
-#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 # Fetch pre-trained WAV2VEC2_ASR_BASE_960H model
 bundle = torchaudio.pipelines.WAV2VEC2_ASR_BASE_960H
 model = bundle.get_model()
