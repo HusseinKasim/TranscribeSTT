@@ -17,15 +17,10 @@ labels = bundle.get_labels()
 app = FastAPI()
 buffer = []
 
-origins = [
-    'https://husseinkasim.github.io/',
-    'https://husseinkasim.github.io/TranscribeSTT/'
-]
-
 # Temp for dev
 app.add_middleware(
     CORSMiddleware,
-    allow_origins = origins,
+    allow_origins = ["*"],
     allow_credentials = True,
     allow_methods = ["*"],
     allow_headers = ["*"],
