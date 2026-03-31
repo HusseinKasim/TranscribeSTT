@@ -25,7 +25,8 @@ app.add_middleware(
 
 data_store = asyncio.Queue()
 
-@app.get("/transcribe")
+# Transcription endpoint
+@app.get("/api/transcription")
 async def transcribe():
     global buffer
 
@@ -84,7 +85,8 @@ async def transcribe():
     return {'message': ''}
 
 
-@app.websocket("/api/data")
+# Websocket endpoint
+@app.websocket("/ws/transcription")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
@@ -92,6 +94,12 @@ async def websocket_endpoint(websocket: WebSocket):
         await data_store.put(data)
         response = await transcribe()
         await websocket.send_json(response)
+
+
+# Health check endpoint
+@app.get("/api/health")
+def healthCheck():
+    return {'status': 'ok'}
 
 
 class GreedyCTCDecoder(torch.nn.Module):
