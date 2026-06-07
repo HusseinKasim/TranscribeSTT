@@ -82,8 +82,6 @@ async def websocket_endpoint(websocket: WebSocket):
 
             buffer.clear()
             await websocket.send_json({'message': transcript})
-        else:
-            await websocket.send_json({'message': ''})
 
 
 # Health check endpoint
