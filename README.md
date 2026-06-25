@@ -13,7 +13,27 @@ The frontend of this website streams audio (captured by a microphone) to the bac
 
 -----
 
-## How to Run
+## Features
+- Real-time WebSocket streaming from microphone
+- Live speech-to-text transcription processing
+- PyTorch-based **WAV2VEC2_ASR_BASE_960H** model
+- REST API for health checks and model information
+- Docker containerization support
+
+-----
+
+## API Endpoints
+
+### REST API
+  - `GET /api/health` -> checks if server is running
+  - `GET /api/model` -> returns information about the **WAV2VEC2_ASR_BASE_960H** model
+
+### WebSocket
+  - `ws://localhost:8003/ws/transcription` -> real-time audio transcription streaming
+
+-----
+
+## How to Run Locally
 ### Frontend
 
 ```bash
@@ -36,24 +56,4 @@ This option will also run the Websocket at:
 cd backend
 pip install -r requirements.txt
 python -m uvicorn app:app --host 0.0.0.0 --port 8003
-```
-
------
-
-## API Endpoints
-
-### REST API
-  - `GET /api/health` -> checks if server is running
-  - `GET /api/model` -> returns information about the **WAV2VEC2_ASR_BASE_960H** model
-
-### WebSocket
-  - `ws://localhost:8003/ws/transcription` -> real-time audio transcription streaming
-
------
-
-## Features
-- Real-time WebSocket streaming from microphone
-- Live speech-to-text transcription processing
-- PyTorch-based **WAV2VEC2_ASR_BASE_960H** model
-- REST API for health checks and model information
-- Docker containerization support
+``` 
